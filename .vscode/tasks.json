@@ -11,8 +11,8 @@
                 "/Zi",
                 "/EHsc",
                 "/Fe:",
-                "test.exe",
-                "test.cpp"
+                "${workspaceFolder}/windows/test.exe",
+                "${workspaceFolder}/test.cpp"
             ],
             "problemMatcher": [
                 "$gcc"
