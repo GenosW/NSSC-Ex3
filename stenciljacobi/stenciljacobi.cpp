@@ -167,7 +167,9 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             }
             xkp1[i] = temp/aii;
         }
+        // # pragma omp barrier
         // # pragma omp single
+        // # pragma omp atomic
         xk = xkp1;
         // for (size_t i = 0; i < vec_size; i++)
         // {
