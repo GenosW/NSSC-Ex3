@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -7,6 +8,7 @@
 #include <ctime>
 #include <assert.h>
 #include <omp.h>
+
 
 using namespace std;
 
@@ -138,12 +140,12 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     double temp=0.0;
     int chunk = innerLen;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
-    //# pragma omp for schedule(dynamic, chunk) nowait shared(aij,aii,N,h,k,dh2,up,b)
+    //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
         // xkp1 = (b[i] - aij*xk[j])/aii
         // # pragma omp sections nowait
-        // # pragma omp section
+        // # pragma omp for schedule(dynamic, chunk) nowait 
         for (size_t i = 0; i < vec_size; i++) // i is index of vector
         {
             temp = b[i];
@@ -165,7 +167,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             }
             xkp1[i] = temp/aii;
         }
-        // # pragma omp section
+        // # pragma omp single
         xk = xkp1;
         // for (size_t i = 0; i < vec_size; i++)
         // {
