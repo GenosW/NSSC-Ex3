@@ -139,7 +139,9 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     const size_t vec_size = xk.size(), innerLen = N-2;
     double temp=0.0;
     int chunk = innerLen;
+    struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
+    clock_gettime(CLOCK_REALTIME, &tSt);
     //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
@@ -168,9 +170,11 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             xkp1[i] = temp/aii;
         }
         // # pragma omp barrier
-        // # pragma omp single
-        // # pragma omp atomic
+        // # pragma omp master
         xk = xkp1;
+        clock_gettime(CLOCK_REALTIME, &tRound);
+        if (double(tRound.tv_sec - tRound.tv_sec) + double(tRound.tv_nsec - tRound.tv_nsec)/1e9 > 10.0);
+        return 1
         // for (size_t i = 0; i < vec_size; i++)
         // {
         //     xk[i] = xkp1[i];
@@ -180,7 +184,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
 }     
 /*----------------- MAIN -------------------*/
 int main(int argc, char *argv[]){
-    size_t N, innerLen, vec_size, maxIterations;
+    size_t N, innerLen, vec_size, maxIterations, jTimeout;
     const double k= 2 * M_PI, k2 = pow(k,2);
     double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0;
 	struct timespec tItEnd, tItStart;
@@ -231,7 +235,7 @@ int main(int argc, char *argv[]){
     aii = 4.0/h2 + k2;
     aij = -1.0/h2;
     clock_gettime(CLOCK_REALTIME, &tItStart);
-    jacobiMethod(u, b, aii, aij, N, maxIterations);
+    jTimeout = jacobiMethod(u, b, aii, aij, N, maxIterations);
     clock_gettime(CLOCK_REALTIME, &tItEnd);
 
     vector<double> result(vec_size, 0.0);
