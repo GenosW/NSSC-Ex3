@@ -5,7 +5,12 @@ CXX=g++
 # Update the path to your Eigen library
 EIGEN=/iue/tcad3x/users/XXX
 
-CXXFLAGS=-std=c++14 -O3 -Wall -pedantic -march=native -ffast-math -fopenmp
+# Single thread -> no omp
+#CXXFLAGS=-std=c++11 -Wall -pedantic -O3 -ffast-math -march=native
+# Linux
+#CXXFLAGS=-std=c++14 -O3 -Wall -pedantic -march=native -ffast-math -fopenmp
+# Mac
+CXXFLAGS= -v -std=c++14 -O3 -Wall -pedantic -march=native -ffast-math #-Xpreprocessor -fopenmp -lomp  
 
 .DEFAULT_GOAL := all
 

@@ -139,6 +139,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     const size_t vec_size = xk.size(), innerLen = N-2;
     size_t iterationsDone = 0;
     int chunk = innerLen;
+    double daii = 1/aii;
     struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
     clock_gettime(CLOCK_REALTIME, &tSt);
@@ -169,7 +170,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             {
                 temp = temp - aij*xk[i+innerLen];
             }
-            xkp1[i] = temp/aii;
+            xkp1[i] = temp*daii;
         }
         // # pragma omp barrier
         xk.swap(xkp1);
