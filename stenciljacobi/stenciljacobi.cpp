@@ -137,20 +137,22 @@ int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double
 
 int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter){
     const size_t vec_size = xk.size(), innerLen = N-2;
-    double temp=0.0;
+    size_t iterationsDone = 0;
     int chunk = innerLen;
     struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
     clock_gettime(CLOCK_REALTIME, &tSt);
     //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
+    //#pragma omp parallel shared(b,xk,xkp1,aij,aii,vec_size,innerLen)
+    {
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
         // xkp1 = (b[i] - aij*xk[j])/aii
         // # pragma omp sections nowait
-        // # pragma omp for schedule(dynamic, chunk) nowait 
+        #pragma omp parallel for shared(b,xk,xkp1,aij,aii,vec_size,innerLen) schedule(dynamic, chunk)
         for (size_t i = 0; i < vec_size; i++) // i is index of vector
         {
-            temp = b[i];
+            double temp = b[i];
             if (i>innerLen-1)
             {
                 temp = temp - aij*xk[i-innerLen];
@@ -170,33 +172,51 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             xkp1[i] = temp/aii;
         }
         // # pragma omp barrier
-        // # pragma omp master
-        xk = xkp1;
+        xk.swap(xkp1);
         clock_gettime(CLOCK_REALTIME, &tRound);
-        if (double(tRound.tv_sec - tRound.tv_sec) + double(tRound.tv_nsec - tRound.tv_nsec)/1e9 > 10.0);
-        return 1
+        // if (double(tRound.tv_sec - tRound.tv_sec) + double(tRound.tv_nsec - tRound.tv_nsec)/1e9 > 10.0){
+        //     iterationsDone = iteration+1;
+        //     break;
+        // }
         // for (size_t i = 0; i < vec_size; i++)
         // {
         //     xk[i] = xkp1[i];
         // }
     }
-    return 0;
+    }
+    if (iterationsDone == 0){iterationsDone = maxIter;}
+    return iterationsDone;
 }     
+int checkMaxThreads(int& threads){
+    if (threads > omp_get_max_threads()){
+        threads = omp_get_max_threads();
+        return 1;
+    }
+    return 0;
+}
 /*----------------- MAIN -------------------*/
 int main(int argc, char *argv[]){
-    size_t N, innerLen, vec_size, maxIterations, jTimeout;
+    size_t N, innerLen, vec_size, maxIterations;
+    int threads=0;
     const double k= 2 * M_PI, k2 = pow(k,2);
     double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0;
 	struct timespec tItEnd, tItStart;
     //----------------Input----------------//
-    assert(argc==3);
+    assert(argc==4);
     cout << "Command line arguments recognized. Parsing..." << endl;
     string str = argv[1];
     N = stoi(str);
     str = argv[2];
     maxIterations = stoi(str);
+    str = argv[3];
+    threads = stoi(str);
+    
     cout << "Resolution of <"<< N << "> selected!" << endl;
     cout << "Solving with Jacobi method using <" << maxIterations << "> iterations." << endl; 
+    if(checkMaxThreads(threads)){
+        cout << "Too many threads selected! Using maximum number instead!" << endl;
+    }
+    cout << "Using <" << threads << "> threads." << endl;
     
     // Starting time measurement here
     cout << "-------------------------------------------------------------------" << endl;
@@ -210,15 +230,15 @@ int main(int argc, char *argv[]){
     vec_size = pow(innerLen,2);
     //
     vector<double> u(vec_size, 0.0), up(vec_size, 0.0), b(vec_size, 0.0);
-    omp_set_num_threads(2);
-    int chunk = N-2;
+    omp_set_num_threads(threads);
+    int chunk = innerLen;
+    cout << "Status:\n size(u):" << u.size() << endl;
+    cout << "size(up):" << up.size() << endl;
+    cout << "size(b):" << b.size() << endl;
     //Create --> put into function
-    #pragma omp for schedule(dynamic, chunk) nowait shared(N,h,k,dh2,up,b)
+    #pragma omp parallel for shared(N,h,k,dh2,up,b) schedule(dynamic, chunk)
     for (size_t i = 0; i < vec_size; i++)
     {
-        // Compute x and y depending on index i
-        // x = double(i%(innerLen)+1)*h;
-        // y = (floor(i/(innerLen))+1)*h;
         double x = getX(i, N, h);
         double y = getY(i, N, h);
         // Create vectors
@@ -235,10 +255,14 @@ int main(int argc, char *argv[]){
     aii = 4.0/h2 + k2;
     aij = -1.0/h2;
     clock_gettime(CLOCK_REALTIME, &tItStart);
-    jTimeout = jacobiMethod(u, b, aii, aij, N, maxIterations);
+    size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations);
     clock_gettime(CLOCK_REALTIME, &tItEnd);
 
     vector<double> result(vec_size, 0.0);
+    cout << "Status:\n size(u):" << u.size() << endl;
+    cout << "size(up):" << up.size() << endl;
+    cout << "size(b):" << b.size() << endl;
+    cout << "size(result):" << result.size() << endl;
     // Compute residual = A*u - b after Jacobi Method
     checkEq(result, u, b, aii, aij, N);
     size_t index_of_max=0;
@@ -257,7 +281,7 @@ int main(int argc, char *argv[]){
     // Get runtime for this run and write into file
     itRuntime = double(tItEnd.tv_sec - tItStart.tv_sec) + double(tItEnd.tv_nsec - tItStart.tv_nsec)/1e9;
     cout << "runtime: " << itRuntime << "s" << endl;
-    cout << "Iterations: " << maxIterations << endl;
+    cout << "Iterations: " << iterationsDone << endl;
     return 0;
 }
 
