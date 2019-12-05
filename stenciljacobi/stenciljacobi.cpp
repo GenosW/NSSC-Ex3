@@ -151,7 +151,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     {
         // xkp1 = (b[i] - aij*xk[j])/aii
         // # pragma omp sections nowait
-        #pragma omp parallel for shared(b,xk,xkp1,aij,aii,vec_size,innerLen) schedule(dynamic, chunk)
+        #pragma omp parallel for shared(b,xk,xkp1) schedule(dynamic, chunk) firstprivate(innerLen,aij,aii,vec_size)
         for (size_t i = 0; i < vec_size; i++) // i is index of vector
         {
             double temp = 0.0;
@@ -174,7 +174,15 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             xkp1[i] = (temp*aij + b[i])*daii;
         }
         // # pragma omp barrier
-        xk.swap(xkp1);
+        #pragma omp parallel for schedule(dynamic, chunk) shared(xk,xkp1) firstprivate(vec_size)
+        for (size_t i = 0; i < vec_size; i++) // i is index of vector
+        {
+            xk[i] = xkp1[i];
+        }
+        // vector<double> xkp1;
+        // vector<double> * pointerToResult = &newResult;
+        // xk
+        //omp_get_wtime
         clock_gettime(CLOCK_REALTIME, &tRound);
         if (double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9 > maxTime_s){
             iterationsDone = iteration+1;
@@ -245,7 +253,7 @@ int main(int argc, char *argv[]){
     //Reserve memory
     vec_size = pow(innerLen,2);
     //
-    vector<double> u(vec_size, 0.0), up(vec_size, 0.0), b(vec_size, 0.0);
+    vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
     omp_set_num_threads(threads);
     int chunk = innerLen;
     cout << "Status:\n size(u):" << u.size() << endl;
