@@ -1,4 +1,5 @@
 #define _USE_MATH_DEFINES
+// #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -8,7 +9,6 @@
 #include <ctime>
 #include <assert.h>
 #include <omp.h>
-
 
 using namespace std;
 
@@ -115,7 +115,7 @@ int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double
         cerr << "vec_size != pow(N,2)" << endl;
         return -1;
     }
-    #pragma omp parallel for shared(b,u,aij,aii,vec_size,innerLen) schedule(dynamic, innerLen)
+    #pragma omp parallel for shared(b,u) firstprivate(aij,aii,vec_size,innerLen) schedule(dynamic, innerLen)
     for (size_t i = 0; i < vec_size; i++)
     {
         double tempDiff = aii*u[i] - b[i];
@@ -140,63 +140,73 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     const size_t vec_size = xk.size(), innerLen = N-2;
     size_t iterationsDone = 0;
     int chunk = innerLen;
-    double daii = 1/aii;
+    bool stop = false;
+    double daii = 1/aii, runtime = 0.0;
     struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
     clock_gettime(CLOCK_REALTIME, &tSt);
     //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
     //#pragma omp parallel shared(b,xk,xkp1,aij,aii,vec_size,innerLen)
+    //
+    //IF OMP_CANCELLATION=true 
+    //cout << omp_get_cancellation() << endl;
+    //assert(omp_get_cancellation());
+    #pragma omp parallel shared(b,xk,xkp1,stop,runtime)  firstprivate(innerLen,aij,aii,vec_size)
     {
+    //for (size_t iteration = 0; iteration < maxIter and stop<0; iteration++)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
         // xkp1 = (b[i] - aij*xk[j])/aii
         // # pragma omp sections nowait
-        #pragma omp parallel for shared(b,xk,xkp1) schedule(dynamic, chunk) firstprivate(innerLen,aij,aii,vec_size)
-        for (size_t i = 0; i < vec_size; i++) // i is index of vector
-        {
-            double temp = 0.0;
-            if (i>innerLen-1)
+        if(!stop){
+            //#pragma omp cancellation point parallel
+            #pragma omp for schedule(dynamic, chunk)
+            for (size_t i = 0; i < vec_size; i++) // i is index of vector
             {
-                temp = temp - xk[i-innerLen];
+                double temp = 0.0;
+                if (i>innerLen-1)
+                {
+                    temp = temp - xk[i-innerLen];
+                }
+                if (i>0 && i%innerLen!=0)
+                {
+                    temp = temp - xk[i-1]; //left of diag
+                }
+                if (i<(vec_size-1) && (i+1)%innerLen!=0)
+                {
+                    temp = temp - xk[i+1]; //right of diag
+                }
+                if (i<vec_size-(innerLen))
+                {
+                    temp = temp - xk[i+innerLen];
+                }
+                xkp1[i] = (temp*aij + b[i])*daii;
             }
-            if (i>0 && i%innerLen!=0)
+            #pragma omp single
             {
-                temp = temp - xk[i-1]; //left of diag
+                xk.swap(xkp1);
+                //omp_get_wtime
+                clock_gettime(CLOCK_REALTIME, &tRound);
+                runtime = double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9;
+                stop = runtime > maxTime_s; 
+                if (iteration%10000 == 0) 
+                {   
+                    cout <<"Iteration <" << iteration << "> done!" << endl;
+                    cout << "Stop: " << stop << endl;
+                }
             }
-            if (i<(vec_size-1) && (i+1)%innerLen!=0)
-            {
-                temp = temp - xk[i+1]; //right of diag
-            }
-            if (i<vec_size-(innerLen))
-            {
-                temp = temp - xk[i+innerLen];
-            }
-            xkp1[i] = (temp*aij + b[i])*daii;
+            if (stop){
+                    iterationsDone = iteration+1;
+                    //stop = 1;
+                    //#pragma omp cancel parallel
+                }
+            #pragma omp cancellation point parallel
         }
-        // # pragma omp barrier
-        #pragma omp parallel for schedule(dynamic, chunk) shared(xk,xkp1) firstprivate(vec_size)
-        for (size_t i = 0; i < vec_size; i++) // i is index of vector
-        {
-            xk[i] = xkp1[i];
-        }
-        // vector<double> xkp1;
-        // vector<double> * pointerToResult = &newResult;
-        // xk
-        //omp_get_wtime
-        clock_gettime(CLOCK_REALTIME, &tRound);
-        if (double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9 > maxTime_s){
-            iterationsDone = iteration+1;
-            return iterationsDone;
-        }
-        // for (size_t i = 0; i < vec_size; i++)
-        // {
-        //     xk[i] = xkp1[i];
-        // }
     }
     }
     if (iterationsDone == 0){iterationsDone = maxIter;}
     return iterationsDone;
-}     
+}   
 int checkMaxThreads(int& threads){
     if (threads > omp_get_max_threads()){
         threads = omp_get_max_threads();
@@ -241,7 +251,6 @@ int main(int argc, char *argv[]){
         cout << "Too many threads selected! Using maximum number instead!" << endl;
     }
     cout << "Using <" << threads << "> threads." << endl;
-    
     // Starting time measurement here
     cout << "-------------------------------------------------------------------" << endl;
     // Let's compute some values we will need quite often
@@ -249,13 +258,13 @@ int main(int argc, char *argv[]){
     h = 1.0/double(N-1);
     h2 = pow(h,2);
     dh2 = 1.0/h2;
+    omp_set_num_threads(threads);
+    int chunk = innerLen;
     //----------------Create FD stencil----------------//
     //Reserve memory
     vec_size = pow(innerLen,2);
     //
     vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
-    omp_set_num_threads(threads);
-    int chunk = innerLen;
     cout << "Status:\n size(u):" << u.size() << endl;
     cout << "size(up):" << up.size() << endl;
     cout << "size(b):" << b.size() << endl;
@@ -268,10 +277,10 @@ int main(int argc, char *argv[]){
         // Create vectors
         up[i] = up_func(x, y, k);
         if (vec_size-i<=(innerLen)) { // top most row has boundary condition
-            b[i] = f(x, y, k) + dh2*up_func(x,1,k); 
+            b[i] = f(x,y,k) + dh2*up_func(x,1,k); 
         }
         else {
-            b[i] = f(x, y, k);
+            b[i] = f(x,y,k);
         }
     }
     
