@@ -1,5 +1,4 @@
 # requirements on ubuntu/linux mint
-# sudo apt-get install build-essential libopenblas-base libopenblas-dev libeigen3-dev
 
 CXX=g++
 # Single thread -> no omp

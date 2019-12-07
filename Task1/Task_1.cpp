@@ -23,7 +23,7 @@ vector<vector<double>> readMatrix(string file, string mode)
 	vector<vector<double>> result;
 	vector<double> V, IA, JA;
 	double v, off = 1.0;
-	if (mode == "custom")
+	if (mode == "test")
 	{
 		off = 0.0;
 	}
@@ -61,18 +61,18 @@ vector<vector<double>> readMatrix(string file, string mode)
 
 	result.push_back(IA);
 	cout << "size(IA): " << result[0].size() << endl;
-	//displayVector(IA);
+	displayVector(IA);
 	result.push_back(JAnew);
 	cout << "size(JA): " << result[1].size()  << endl;
-	//displayVector(JAnew);
+	displayVector(JAnew);
 	result.push_back(V);
 	cout << "size(V): " << result[2].size()  << endl;
-	//displayVector(V);
+	displayVector(V);
     cout << "Read in everything successfully" << endl;
 	return result;
 }
 
-vector<double> matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double>& JA, vector<double>& x, vector<double>& y)
+void matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double>& JA, vector<double>& x, vector<double>& y)
 {
 	size_t vec_size = x.size();
 	//double sum;
@@ -84,23 +84,23 @@ vector<double> matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double
 			{
 				if(i == IA[index])
 				{
-					//cout << "y[i] :" << y[i] << endl;
+					cout << "y[i] :" << y[i] << endl;
 					y[i] += V[index]*x[j];
-					//cout << "i: " << i << " j: " << " index: " << index << " V[index]: " << V[index] << " y[i]: " << y[i] << endl;
+					cout << "i: " << i << " j: " << " index: " << index << " V[index]: " << V[index] << " y[i]: " << y[i] << endl;
 					break;
 				}
 			}
 		}
 		for(size_t index = JA[i]; index < JA[i+1]; index++)
 		{
-			//cout << "y[i] :" << y[i] << endl;
+			cout << "y[i] :" << y[i] << endl;
 			y[i] += V[index]*x[index];
-			//cout << "i: " << i << " j: " << " index: " << index << " V[index]: " << V[index] << " y[i]: " << y[i] << endl;
+			cout << "i: " << i << " j: " << " index: " << index << " V[index]: " << V[index] << " y[i]: " << y[i] << endl;
 		}
 		if(i%1000 == 0)
 			cout << y[i] << "    i: " << i << " from " << x.size() << endl;
 	}
-	return y;
+	//return y;
 }
 
 //JA : [0 j1 j2 ... 112xxx]
@@ -108,7 +108,7 @@ vector<double> matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double
 int main(int argc, char *argv[])
 {
 	// vector<vector<double>> vec = readMatrix("s3rmt3m1.mtx", "mm");
-	vector<vector<double>> vec = readMatrix("s3rmt3m1.mtx", "mm");
+	vector<vector<double>> vec = readMatrix("test.mtx", "test");
 	int vec_size = vec[2].size();
 	vector<double> x(vec_size, 1.0);
 	vector<double> y(vec_size, 0.0);
