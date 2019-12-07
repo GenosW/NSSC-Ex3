@@ -1,0 +1,8 @@
+Output: Task_1.o
+	g++ Task_1.o -o Output
+
+Task_1.o: Task_1.cpp;
+	g++ -c Task_1.cpp
+
+CXX=g++
+CXXFLAGS=-std=c++11 -Wall -pedantic -O3 -ffast-math -march=native 
