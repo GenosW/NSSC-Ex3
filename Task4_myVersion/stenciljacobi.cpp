@@ -214,12 +214,14 @@ int checkMaxThreads(int& threads){
     }
     return 0;
 }
-int inputIUE(int argc, char* argv[],size_t &N,int &threads){
+int inputIUE(int argc, char* argv[],string policy,size_t &N,int &threads){
     assert(argc==3);
     cout << "Command line arguments recognized. Parsing in IUE mode..." << endl;
     string str = argv[1];
-    N = stoi(str);
+    policy = str;
     str = argv[2];
+    N = stoi(str);
+    str = argv[3];
     threads = stoi(str);
     return 0;
 }
@@ -240,10 +242,11 @@ int main(int argc, char *argv[]){
     int threads=0, mode;
     const double k= 2 * M_PI, k2 = pow(k,2);
     double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0;
+    string policy;
 	struct timespec tItEnd, tItStart;
     //----------------Input----------------//
-    mode = inputPC(argc,argv, N, maxIterations,threads);
-    // mode = inputIUE(argc,argv, N, maxIterations,threads);
+    // mode = inputPC(argc,argv, N, maxIterations,threads);
+    mode = inputIUE(argc,argv,policy,N,threads);
     assert(mode==0 or mode==1);
     cout << "Resolution of <"<< N << "> selected!" << endl;
     cout << "Solving with Jacobi method using <" << maxIterations << "> iterations." << endl; 
@@ -255,6 +258,7 @@ int main(int argc, char *argv[]){
         cout << omp_get_max_threads() << " would be available!" << endl;
     }
     cout << "Using <" << threads << "> threads." << endl;
+    cout << "Policy: " << policy << endl;
     // Starting time measurement here
     cout << "-------------------------------------------------------------------" << endl;
     // Let's compute some values we will need quite often
