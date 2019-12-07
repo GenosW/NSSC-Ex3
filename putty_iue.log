@@ -1,0 +1,372 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2019.12.07 13:34:56 =~=~=~=~=~=~=~=~=~=~=~=
+Using username "nssc_holzner".
+Using keyboard-interactive authentication.
+Password: 
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Last login: Sat Dec  7 13:00:51 2019 from 128.131.237.216
+[nssc_holzner@tcad30 ~]$ ls -l
+total 0
+drwxr-xr-x. 2 nssc_holzner nssc 10 Dec  7 13:01 ex3_stenciljacobi
+[nssc_holzner@tcad30 ~]$ cd ex3_stenciljacobi/
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ cd ex3_stenciljacobi/ls -lexitls -lscp D:\Studium\Code\NSSC\NSSC-Ex3\Task4__myVersion\stenciljacobi.cpp nssc_holzner@tcad30.iue.tuwien.ac.at:/ex3_stenciljaccobi
+ssh_exchange_identification: Connection closed by remote host
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ scp D:\Studium\Code\NSSC\NSSC-Ex3\Task4__myVersion\stenciljacobi.cpp nssc_holzner@tcad30.iue.tuwien.ac.at:/ex3_stenciljaccobicd ex3_stenciljacobi/
+
+
+-bash: cd: ex3_stenciljacobi/: No such file or directory
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ cd ex3_stenciljacobi/scp D:\Studium\Code\NSSC\NSSC-Ex3\Task4__myVersion\stenciljacobi.cpp nssc_holzner@tcad30.iue.tuwien.ac.at:/ex3_stenciljaccobicd ex3_stenciljacobi/
+
+ls -l
+total 0
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ cd ..
+[nssc_holzner@tcad30 ~]$ ls -l
+total 0
+drwxr-xr-x. 2 nssc_holzner nssc 10 Dec  7 13:01 ex3_stenciljacobi
+[nssc_holzner@tcad30 ~]$ ^C
+[nssc_holzner@tcad30 ~]$ scp D:\Studium\Code\NSSC\NSSC-Ex3\Task4_myVersion\stenciiljacobi.cpp nssc_holzner@tcad30.iue.tuwien.ac.at:/ex3_stenciljacobi
+ssh_exchange_identification: Connection closed by remote host
+[nssc_holzner@tcad30 ~]$ ls -l
+total 12
+drwxr-xr-x. 2 nssc_holzner nssc    10 Dec  7 13:01 ex3_stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+[nssc_holzner@tcad30 ~]$ mv ex3_stenciljacobi/stenciljacobi.cpp stex3_stenciljacobi/
+[nssc_holzner@tcad30 ~]$ ls -l
+total 0
+drwxr-xr-x. 2 nssc_holzner nssc 39 Dec  7 13:39 ex3_stenciljacobi
+[nssc_holzner@tcad30 ~]$ cd ex3_stenciljacobi/
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -l
+total 12
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ pwd
+/iue/tcad3x/users/nssc_holzner/ex3_stenciljacobi
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -l
+total 16
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ make
+g++ stenciljacobi.cpp -o stenciljacobi -v -std=c++14 -O3 -Wall -pedantic -march=native -ffast-math -fopenmp
+Using built-in specs.
+COLLECT_GCC=g++
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.2.1 20180905 (Red Hat 8.2.1-3) (GCC) 
+COLLECT_GCC_OPTIONS='-o' 'stenciljacobi' '-v' '-std=c++14' '-O3' '-Wall' '-Wpedantic' '-march=native' '-ffast-math' '-fopenmp' '-shared-libgcc' '-pthread'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/cc1plus -quiet -v -D_GNU_SOURCE -D_REENTRANT stenciljacobi.cpp -march=skylake-avx512 -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mno-sgx -mbmi2 -mno-pconfig -mno-wbnoinvd -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mrtm -mhle -mrdrnd -mf16c -mfsgsbase -mrdseed -mprfchw -madx -mfxsr -mxsave -mxsaveopt -mavx512f -mno-avx512er -mavx512cd -mno-avx512pf -mno-prefetchwt1 -mclflushopt -mxsavec -mxsaves -mavx512dq -mavx512bw -mavx512vl -mno-avx512ifma -mno-avx512vbmi -mno-avx5124fmaps -mno-avx5124vnniw -mclwb -mno-mwaitx -mno-clzero -mpku -mno-rdpid -mno-gfni -mno-shstk -mno-avx512vbmi2 -mavx512vnni -mno-vaes -mno-vpclmulqdq -mno-avx512bitalg -mno-movdiri -mno-movdir64b --param l1-cache-size=32 --param l1-cache-line-size=64 --param l2-cache-size=11264 -mtune=skylake-avx512 -quiet -dumpbase stenciljacobi.cpp -auxbase stenciljacobi -O3 -Wall -Wpedantic -std=c++14 -version -ffast-math -fopenmp -o /tmp/ccRqxcpc.s
+GNU C++14 (GCC) version 8.2.1 20180905 (Red Hat 8.2.1-3) (x86_64-redhat-linux)
+compiled by GNU C version 8.2.1 20180905 (Red Hat 8.2.1-3), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/lib/gcc/x86_64-redhat-linux/8/include
+ /usr/local/include
+ /usr/include
+End of search list.
+GNU C++14 (GCC) version 8.2.1 20180905 (Red Hat 8.2.1-3) (x86_64-redhat-linux)
+compiled by GNU C version 8.2.1 20180905 (Red Hat 8.2.1-3), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: b6ed91b485041c4398b3e7ce2d02aef7
+COLLECT_GCC_OPTIONS='-o' 'stenciljacobi' '-v' '-std=c++14' '-O3' '-Wall' '-Wpedantic' '-march=native' '-ffast-math' '-fopenmp' '-shared-libgcc' '-pthread'
+ as -v --64 -o /tmp/cc60avyM.o /tmp/ccRqxcpc.s
+GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-49.el8
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+Reading specs from /usr/lib/gcc/x86_64-redhat-linux/8/libgomp.spec
+COLLECT_GCC_OPTIONS='-o' 'stenciljacobi' '-v' '-std=c++14' '-O3' '-Wall' '-Wpedantic' '-march=native' '-ffast-math' '-fopenmp' '-shared-libgcc' '-pthread'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccHVEgJm.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o stenciljacobi /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o /usr/lib/gcc/x86_64-redhat-linux/8/crtoffloadbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. /tmp/cc60avyM.o -lstdc++ -lm -lgomp -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtfastmath.o /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o /usr/lib/gcc/x86_64-redhat-linux/8/crtoffloadend.o
+COLLECT_GCC_OPTIONS='-o' 'stenciljacobi' '-v' '-std=c++14' '-O3' '-Wall' '-Wpedantic' '-march=native' '-ffast-math' '-fopenmp' '-shared-libgcc' '-pthread'
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ [nssc_holzner@tcad30 ex3_stenciljacobi]$ [nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -l
+total 52
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rwxr-xr-x. 1 nssc_holzner nssc 34600 Dec  7 13:42 stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -l
+total 56
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rwxr-xr-x. 1 nssc_holzner nssc 34600 Dec  7 13:42 stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+-rw-------. 1 nssc_holzner nssc   439 Dec  7 13:53 submit_stencil.sh
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ sbatch submit_stencil.sh 
+Submitted batch job 319
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -l
+total 56
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rw-r--r--. 1 nssc_holzner nssc     0 Dec  7 13:54 slurm-319.out
+-rwxr-xr-x. 1 nssc_holzner nssc 34600 Dec  7 13:42 stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+-rw-------. 1 nssc_holzner nssc   439 Dec  7 13:53 submit_stencil.sh
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim slurm-319.out 
+"slurm-319.out" 32L, 712C  Command line arguments recognized. Parsing in PC mode...
+Resolution of <256> selected!
+Solving with Jacobi method using <200000> iterations.
+10 would be available!
+Using <4> threads.
+-------------------------------------------------------------------
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+Iteration <0> done!
+Stop: 0
+Iteration <10000> done!
+Stop: 0
+Iteration <20000> done!
+Stop: 0
+Iteration <30000> done!
+Stop: 0
+Iteration <40000> done!
+Stop: 0
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+size(result):64516
+eucNorm(A*u-b): 0.302208
+maxNorm(A*u-b): 0.00237103
+eucNorm(up-u): 0.306572
+maxNorm(up-u): 0.00342543
+runtime: 10.0004s
+Iterations: 41172
+Average runtime per iteration: 0.000242894s
+~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     1,1All^[  ^[  q^M   ^[  ^[  ^[  ^[  ^[  ^[  ^[  ^[  ^[  ^[  ~@k   2~@k   1~@k   2~@k   2qqrecording @q2,2All~@k   1~@k   1,56^[  ^[  ^[  ^[  ~@k   5~@k   4~@k   3^M  2,1 q2,1All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim submit_stencil.sh 
+"submit_stencil.sh" 15L, 439C  #!/bin/bash
+# Number of cores
+#SBATCH -c 10
+# Runtime of this jobs is less then 10 minutes
+#            (hh:mm:ss)
+#SBATCH --time=00:10:00
+# Clear the environment
+module purge > /dev/null 2>&1
+# Set OMP_NUM_THREADS to the same value as -c
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+# You can start several programs with one script file/submission
+./stenciljacobi 256 200000 4
+#./stenciljacobi 512 100000 4
+#./stenciljacobi 1024 100000 4
+
+~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     1,1All~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   2~@k   3~@k   4~@k   5~@k   9~@k   10,5~@k   1~@k   2~@k   6~@k   7~@k   8~@k   9~@k   10~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   10~@k     1~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   ~@k   ~@k   ~@k   dl  7<20>    3,1 ~@k   ~@k   2~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   10~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7<20>    3,1 ~@k   2~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   10~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   ~@k   ~@k   10~@k     -- INSERT --12,27All819030^[   10 10 10 10 10 10 10 10 1012,56All~@k   5~@k   6~@k   7~@k   6~@k   5~@k   4~@k   3~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   dl  6~@k   dl  5~@k   dl  4~@k   dl  3~@k   dl  2~@k   dl  1~@k   dl  0~@k   dl  49~@k   dl  8~@k   dl  7~@k   dl  6~@k   dl  5~@k   dl  4~@k   dl  3~@k   dl  2~@k   dl  1~@k   dl  0~@k   dl  39~@k   dl  8~@k   dl  7~@k   dl  6~@k   dl  5~@k   dl  4~@k   dl  3~@k   dl  2~@k   dl  1~@k   dl  0^M  3,1 ^[  ^[  ::qsE33: No previous substitute regular expression13,1All::qE37: No write since last change (add ! to override)13,1All::w"submit_stencil.sh" 15L, 441C written13,1All13,1All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim submit_stencil.sh 
+"submit_stencil.sh" 15L, 441C  #!/bin/bash
+# Number of cores
+#SBATCH -c 10
+# Runtime of this jobs is less then 10 minutes
+#            (hh:mm:ss)
+#SBATCH --time=00:10:00
+# Clear the environment
+module purge > /dev/null 2>&1
+# Set OMP_NUM_THREADS to the same value as -c
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+# You can start several programs with one script file/submission
+./stenciljacobi 256 200000 10
+#./stenciljacobi 512 100000 4
+#./stenciljacobi 1024 100000 4
+
+~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     13,1All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim submit_stencil.sh lurm-319.outls -lsbatch submit_stencil.sh 
+Submitted batch job 320
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ sbatch submit_stencil.sh vimlurm-319.outls -l
+total 60
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rw-r--r--. 1 nssc_holzner nssc   712 Dec  7 13:54 slurm-319.out
+-rw-r--r--. 1 nssc_holzner nssc     0 Dec  7 14:00 slurm-320.out
+-rwxr-xr-x. 1 nssc_holzner nssc 34600 Dec  7 13:42 stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+-rw-------. 1 nssc_holzner nssc   441 Dec  7 13:59 submit_stencil.sh
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -lsbatch submit_stencil.sh vimlurm-319.out20
+"slurm-320.out" 0L, 0C  ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     0,0-1All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim slurm-320.out 
+"slurm-320.out" 42L, 875C  Command line arguments recognized. Parsing in PC mode...
+Resolution of <256> selected!
+Solving with Jacobi method using <200000> iterations.
+10 would be available!
+Using <10> threads.
+-------------------------------------------------------------------
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+Iteration <0> done!
+Stop: 0
+Iteration <10000> done!
+Stop: 0
+Iteration <20000> done!
+Stop: 0
+Iteration <30000> done!
+Stop: 0
+Iteration <40000> done!
+Stop: 0
+Iteration <50000> done!
+Stop: 0
+Iteration <60000> done!
+Stop: 0
+Iteration <70000> done!
+Stop: 0
+Iteration <80000> done!
+Stop: 0
+Iteration <90000> done!
+Stop: 0
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+size(result):64516
+eucNorm(A*u-b): 4.073e-07
+maxNorm(A*u-b): 1.96039e-08
+eucNorm(up-u): 0.308737
+maxNorm(up-u): 0.00343651
+runtime: 10.0004s
+Iterations: 96379
+Average runtime per iteration: 0.000103761s1,1All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim slurm-320.out ls -lsbatch submit_stencil.sh vim
+"submit_stencil.sh" 15L, 441C  #!/bin/bash
+# Number of cores
+#SBATCH -c 10
+# Runtime of this jobs is less then 10 minutes
+#            (hh:mm:ss)
+#SBATCH --time=00:10:00
+# Clear the environment
+module purge > /dev/null 2>&1
+# Set OMP_NUM_THREADS to the same value as -c
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+# You can start several programs with one script file/submission
+./stenciljacobi 256 200000 10
+#./stenciljacobi 512 100000 4
+#./stenciljacobi 1024 100000 4
+
+~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     ~                                                                                                                                     13,1All~@k   2~@k   1~@k   0~@k   9,1 ~@k   8~@k   7~@k   6~@k   5~@k   4~@k   3~@k   2~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   3~@k   9~@k   10~@k   1~@k   2~@k   3~@k   2~@k   -- INSERT --3,12All410340304,1All
+#SBATCH -c 40~                                                                                                                                     3,13All^[  3,12All~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   10,12~@k   1~@k   2~@k   3~@k   4~@k   3~@k   3~@k   2~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   dl  0 ~@k   -- INSERT --12,28All409013,1All
+./stenciljacobi 256 200000 40~                                                                                                                                     12,29All^[  12,28All::w"submit_stencil.sh" 15L, 441C written12,28All12,28All::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim submit_stencil.sh lurm-320.outls -lsbatch submit_stencil.sh 
+Submitted batch job 321
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ squeue -u nssc_holzner
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ squeue -u nssc_holznerbatch submit_stencil.sh vimlurm-320.outubmit_stencil.shsbatchqueue -u nssc_holznerls -l
+total 68
+-rw-------. 1 nssc_holzner nssc   620 Dec  7 13:42 Makefile
+-rw-r--r--. 1 nssc_holzner nssc   712 Dec  7 13:54 slurm-319.out
+-rw-r--r--. 1 nssc_holzner nssc   875 Dec  7 14:00 slurm-320.out
+-rw-r--r--. 1 nssc_holzner nssc  1140 Dec  7 14:03 slurm-321.out
+-rwxr-xr-x. 1 nssc_holzner nssc 34600 Dec  7 13:42 stenciljacobi
+-rw-------. 1 nssc_holzner nssc 10837 Dec  7 13:39 stenciljacobi.cpp
+-rw-------. 1 nssc_holzner nssc   441 Dec  7 14:02 submit_stencil.sh
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ ls -lsqueue -u nssc_holznerls -ltailö -f slurm-321.out 
+size(up):64516
+size(b):64516
+size(result):64516
+eucNorm(A*u-b): 4.073e-07
+maxNorm(A*u-b): 1.96039e-08
+eucNorm(up-u): 0.308737
+maxNorm(up-u): 0.00343651
+runtime: 10.0004s
+Iterations: 172206
+Average runtime per iteration: 5.80721e-05s
+^[  :q
+exit
+^[[A^[[A^[[A^[[B^[[B^[[B^[^[                            ^C
+[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim slurm-321.out 
+"slurm-321.out" 58L, 1140C  Command line arguments recognized. Parsing in PC mode...
+Resolution of <256> selected!
+Solving with Jacobi method using <200000> iterations.
+40 would be available!
+Using <40> threads.
+-------------------------------------------------------------------
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+Iteration <0> done!
+Stop: 0
+Iteration <10000> done!
+Stop: 0
+Iteration <20000> done!
+Stop: 0
+Iteration <30000> done!
+Stop: 0
+Iteration <40000> done!
+Stop: 0
+Iteration <50000> done!
+Stop: 0
+Iteration <60000> done!
+Stop: 0
+Iteration <70000> done!
+Stop: 0
+Iteration <80000> done!
+Stop: 0
+Iteration <90000> done!
+Stop: 0
+Iteration <100000> done!
+Stop: 0
+Iteration <110000> done!
+Stop: 0
+Iteration <120000> done!
+Stop: 0
+Iteration <130000> done!
+Stop: 0
+Iteration <140000> done!
+Stop: 0
+Iteration <150000> done!
+Stop: 01,1Top~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   10,1~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   20~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   8~@k   9~@k   30~@k   1~@k   2~@k   3~@k   4~@k   5~@k   6~@k   7~@k   
+Iteration <160000> done!38,16%~@k   
+Stop: 039,112%~@k   
+Iteration <170000> done!40,118%~@k   
+Stop: 041,125%~@k   
+Status:42,131%~@k   
+size(u):6451643,137%~@k   
+size(up):6451644,143%~@k   
+size(b):6451645,150%~@k   
+size(result):6451646,156%~@k   
+eucNorm(A*u-b): 4.073e-0747,162%~@k   
+maxNorm(A*u-b): 1.96039e-0848,168%~@k   
+eucNorm(up-u): 0.30873749,175%~@k   
+maxNorm(up-u): 0.0034365150,181%~@k   
+runtime: 10.0004s51,187%~@k   
+Iterations: 17220652,193%~@k   
+Average runtime per iteration: 5.80721e-05s53,1Bot~@k   4~@k   5~@k   6~@k   7~@k   8~@k   ~@k   ~@k   ~@k   ::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ vim slurm-321.out 
+"slurm-321.out" 58L, 1140C  Iteration <30000> done!
+Stop: 0
+Iteration <40000> done!
+Stop: 0
+Iteration <50000> done!
+Stop: 0
+Iteration <60000> done!
+Stop: 0
+Iteration <70000> done!
+Stop: 0
+Iteration <80000> done!
+Stop: 0
+Iteration <90000> done!
+Stop: 0
+Iteration <100000> done!
+Stop: 0
+Iteration <110000> done!
+Stop: 0
+Iteration <120000> done!
+Stop: 0
+Iteration <130000> done!
+Stop: 0
+Iteration <140000> done!
+Stop: 0
+Iteration <150000> done!
+Stop: 0
+Iteration <160000> done!
+Stop: 0
+Iteration <170000> done!
+Stop: 0
+Status:
+ size(u):64516
+size(up):64516
+size(b):64516
+size(result):64516
+eucNorm(A*u-b): 4.073e-07
+maxNorm(A*u-b): 1.96039e-08
+eucNorm(up-u): 0.308737
+maxNorm(up-u): 0.00343651
+runtime: 10.0004s
+Iterations: 172206
+Average runtime per iteration: 5.80721e-05s58,1Bot~@k   ~@k   ~@k   ~@k   ~@k   ~@k   ~@k   ::q[nssc_holzner@tcad30 ex3_stenciljacobi]$ 
