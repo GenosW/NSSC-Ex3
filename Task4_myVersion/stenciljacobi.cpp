@@ -136,75 +136,77 @@ int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double
     return 0;
 }
 
-int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter, const double maxTime_s){
+int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter, double& maxTime_s){
     const size_t vec_size = xk.size(), innerLen = N-2;
     size_t iterationsDone = 0;
-    int chunk = innerLen;
+    // int chunk = innerLen;
     bool stop = false;
-    double daii = 1/aii, runtime = 0.0;
-    struct timespec tRound, tSt;
+    double daii = 1/aii, runtime = 0.0, t0 = omp_get_wtime();
+    // struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
-    clock_gettime(CLOCK_REALTIME, &tSt);
+    // clock_gettime(CLOCK_REALTIME, &tSt);
     //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
     //#pragma omp parallel shared(b,xk,xkp1,aij,aii,vec_size,innerLen)
     //
     //IF OMP_CANCELLATION=true 
     //cout << omp_get_cancellation() << endl;
     //assert(omp_get_cancellation());
-    #pragma omp parallel shared(b,xk,xkp1,stop,runtime)  firstprivate(innerLen,aij,aii,vec_size)
+    // #pragma omp parallel shared(b,xk,xkp1,stop,runtime)  firstprivate(innerLen,aij,aii,vec_size)
     {
     //for (size_t iteration = 0; iteration < maxIter and stop<0; iteration++)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
         // xkp1 = (b[i] - aij*xk[j])/aii
         // # pragma omp sections nowait
-        if(!stop){
-            //#pragma omp cancellation point parallel
-            #pragma omp for schedule(dynamic, chunk)
-            for (size_t i = 0; i < vec_size; i++) // i is index of vector
+        // if(!stop){
+        //#pragma omp cancellation point parallel
+        #pragma omp parallel for schedule(dynamic) shared(b,xk,xkp1) firstprivate(innerLen,aij,aii,vec_size)
+        for (size_t i = 0; i < vec_size; i++) // i is index of vector
+        {
+            double temp = 0.0;
+            if (i>innerLen-1)
             {
-                double temp = 0.0;
-                if (i>innerLen-1)
-                {
-                    temp = temp - xk[i-innerLen];
-                }
-                if (i>0 && i%innerLen!=0)
-                {
-                    temp = temp - xk[i-1]; //left of diag
-                }
-                if (i<(vec_size-1) && (i+1)%innerLen!=0)
-                {
-                    temp = temp - xk[i+1]; //right of diag
-                }
-                if (i<vec_size-(innerLen))
-                {
-                    temp = temp - xk[i+innerLen];
-                }
-                xkp1[i] = (temp*aij + b[i])*daii;
+                temp = temp - xk[i-innerLen];
             }
-            #pragma omp single
+            if (i>0 && i%innerLen!=0)
             {
-                xk.swap(xkp1);
-                //omp_get_wtime
-                clock_gettime(CLOCK_REALTIME, &tRound);
-                runtime = double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9;
-                stop = runtime > maxTime_s; 
-                if (iteration%10000 == 0) 
-                {   
-                    cout <<"Iteration <" << iteration << "> done!" << endl;
-                    cout << "Stop: " << stop << endl;
-                }
+                temp = temp - xk[i-1]; //left of diag
             }
-            if (stop){
-                    iterationsDone = iteration+1;
-                    //stop = 1;
-                    //#pragma omp cancel parallel
-                }
-            #pragma omp cancellation point parallel
+            if (i<(vec_size-1) && (i+1)%innerLen!=0)
+            {
+                temp = temp - xk[i+1]; //right of diag
+            }
+            if (i<vec_size-(innerLen))
+            {
+                temp = temp - xk[i+innerLen];
+            }
+            xkp1[i] = (temp*aij + b[i])*daii;
         }
+        // #pragma omp single
+        // {
+        xk.swap(xkp1);
+        runtime = omp_get_wtime() - t0;
+        // clock_gettime(CLOCK_REALTIME, &tRound);
+        // runtime = double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9;
+        stop = runtime > maxTime_s; 
+        // if (iteration%10000 == 0) 
+        // {   
+        //     cout <<"Iteration <" << iteration << "> done!" << endl;
+        //     cout << "Stop: " << stop << endl;
+        // }
+        // }
+        if (stop){
+                iterationsDone = iteration+1;
+                break;
+        //         //stop = 1;
+                // #pragma omp cancel parallel
+            }
+        // #pragma omp cancellation point parallel
+        // }
     }
     }
     if (iterationsDone == 0){iterationsDone = maxIter;}
+    maxTime_s = runtime;
     return iterationsDone;
 }   
 int checkMaxThreads(int& threads){
@@ -215,13 +217,14 @@ int checkMaxThreads(int& threads){
     return 0;
 }
 int inputIUE(int argc, char* argv[],string policy,size_t &N,int &threads){
+    // ./stenciljacobi [policy] [resolution] [threads]
     assert(argc==3);
     cout << "Command line arguments recognized. Parsing in IUE mode..." << endl;
+    // string str = argv[1];
+    // policy = str;
     string str = argv[1];
-    policy = str;
-    str = argv[2];
     N = stoi(str);
-    str = argv[3];
+    str = argv[2];
     threads = stoi(str);
     return 0;
 }
@@ -238,10 +241,10 @@ int inputPC(int argc, char* argv[],size_t &N,size_t &maxIterations,int &threads)
 }
 /*----------------- MAIN -------------------*/
 int main(int argc, char *argv[]){
-    size_t N, innerLen, vec_size, maxIterations;
+    size_t N, innerLen, vec_size, maxIterations = 200000;
     int threads=0, mode;
     const double k= 2 * M_PI, k2 = pow(k,2);
-    double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0;
+    double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0, maxTime = 10.0;
     string policy;
 	struct timespec tItEnd, tItStart;
     //----------------Input----------------//
@@ -273,9 +276,6 @@ int main(int argc, char *argv[]){
     vec_size = pow(innerLen,2);
     //
     vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
-    cout << "Status:\n size(u):" << u.size() << endl;
-    cout << "size(up):" << up.size() << endl;
-    cout << "size(b):" << b.size() << endl;
     //Create --> put into function
     #pragma omp parallel for shared(up,b) firstprivate(N,h,k,dh2) schedule(dynamic, chunk)
     for (size_t i = 0; i < vec_size; i++)
@@ -295,10 +295,10 @@ int main(int argc, char *argv[]){
     // Use Jacobi Method to solve for u
     aii = 4.0/h2 + k2;
     aij = -1.0/h2;
-    clock_gettime(CLOCK_REALTIME, &tItStart);
-    size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, 10.0);
-    clock_gettime(CLOCK_REALTIME, &tItEnd);
-
+    // clock_gettime(CLOCK_REALTIME, &tItStart);
+    size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, maxTime);
+    // clock_gettime(CLOCK_REALTIME, &tItEnd);
+    /*
     vector<double> result(vec_size, 0.0);
     cout << "Status:\n size(u):" << u.size() << endl;
     cout << "size(up):" << up.size() << endl;
@@ -318,12 +318,13 @@ int main(int argc, char *argv[]){
     maxNorm = normVecMax(result, vec_size, index_of_max);
     cout << "eucNorm(up-u): " << eucNorm << endl;
     cout << "maxNorm(up-u): " << maxNorm << endl;
-
+    */
     // Get runtime for this run and write into file
-    itRuntime = double(tItEnd.tv_sec - tItStart.tv_sec) + double(tItEnd.tv_nsec - tItStart.tv_nsec)/1e9;
-    cout << "runtime: " << itRuntime << "s" << endl;
+    // itRuntime = double(tItEnd.tv_sec - tItStart.tv_sec) + double(tItEnd.tv_nsec - tItStart.tv_nsec)/1e9;
+    // cout << "runtime: " << itRuntime << "s" << endl;
+    cout << "runtime: " << maxTime << "s" << endl;
     cout << "Iterations: " << iterationsDone << endl;
-    cout << "Average runtime per iteration: " << itRuntime/iterationsDone << "s" << endl;
+    cout << "Average runtime per iteration: " << maxTime/iterationsDone << "s" << endl;
     return 0;
 }
 
