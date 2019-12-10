@@ -152,7 +152,9 @@ int main(int argc, char *argv[])
 	{
 		input(argc,argv,mode,filename,threads);
 	}
+
 	Eigen::setNbThreads(threads);
+
 	vector<vector<double>> A = readMatrix(filename);
 	int vec_size = A[1].size() - 1;
 	vector<double> xStar(vec_size, 1.0);
@@ -164,19 +166,31 @@ int main(int argc, char *argv[])
 	{
 		matrixmulCCS(A[2],A[0],A[1],xStar,b);
 	}
+
 	Eigen::SparseMatrix<double> SpA;//(vec_size+1,vec_size+1);
 	cout << "here" << endl;
 	Eigen::loadMarket(SpA,filename);
 	cout << "here" << endl;
 	Eigen::VectorXd xStarE, bE(vec_size), xE(vec_size);
 	xStarE.setOnes(vec_size);
+
 	//cout << xStarE << endl;
 	// fill A and b
 	Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::SelfAdjoint> cg(SpA);
-	// setMaxIterations();
-	// setTolerance();
 	bE = SpA * xStarE;
-	xE = cg.solve(bE);
+	// cg.setMaxIterations(1);
+	for(int i=0; i < 1000; i++)
+	{
+		cg.setMaxIterations(i);
+		xE = cg.solve(bE);
+		if (i%100 == 0)
+		{
+			cout << "iterations this loop iteration: " << cg.iterations() << endl;
+			cout << cg.error() << endl;;
+			cout << (xE - xStarE).norm() << endl;;
+			cout << "-------" << endl;
+		}
+	}
 	
 	std::cout << "#iterations:     " << cg.iterations() << std::endl;
 	std::cout << "estimated error: " << cg.error() << std::endl;

@@ -115,7 +115,7 @@ int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double
         cerr << "vec_size != pow(N,2)" << endl;
         return -1;
     }
-    #pragma omp parallel for shared(b,u) firstprivate(aij,aii,vec_size,innerLen) schedule(dynamic)
+    #pragma omp parallel for shared(b,u) firstprivate(aij,aii,vec_size,innerLen) schedule(dynamic, innerLen)
     for (size_t i = 0; i < vec_size; i++)
     {
         double tempDiff = aii*u[i] - b[i];
@@ -136,47 +136,75 @@ int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double
     return 0;
 }
 
-int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter, const int chunk, double& maxTime_s){
+int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter, const double maxTime_s){
     const size_t vec_size = xk.size(), innerLen = N-2;
     size_t iterationsDone = 0;
+    int chunk = innerLen;
     bool stop = false;
-    double daii = 1/aii, runtime = 0.0, t0 = omp_get_wtime();
+    double daii = 1/aii, runtime = 0.0;
+    struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
+    clock_gettime(CLOCK_REALTIME, &tSt);
+    //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
+    //#pragma omp parallel shared(b,xk,xkp1,aij,aii,vec_size,innerLen)
+    //
+    //IF OMP_CANCELLATION=true 
+    //cout << omp_get_cancellation() << endl;
+    //assert(omp_get_cancellation());
+    #pragma omp parallel shared(b,xk,xkp1,stop,runtime)  firstprivate(innerLen,aij,aii,vec_size)
+    {
+    //for (size_t iteration = 0; iteration < maxIter and stop<0; iteration++)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
-        #pragma omp parallel for schedule(dynamic, chunk) shared(b,xk,xkp1) firstprivate(innerLen,aij,daii,vec_size)
-        for (size_t i = 0; i < vec_size; i++) // i is index of vector
-        {
-            double temp = 0.0;
-            if (i>innerLen-1)
+        // xkp1 = (b[i] - aij*xk[j])/aii
+        // # pragma omp sections nowait
+        if(!stop){
+            //#pragma omp cancellation point parallel
+            #pragma omp for schedule(dynamic, chunk)
+            for (size_t i = 0; i < vec_size; i++) // i is index of vector
             {
-                temp = temp - xk[i-innerLen];
+                double temp = 0.0;
+                if (i>innerLen-1)
+                {
+                    temp = temp - xk[i-innerLen];
+                }
+                if (i>0 && i%innerLen!=0)
+                {
+                    temp = temp - xk[i-1]; //left of diag
+                }
+                if (i<(vec_size-1) && (i+1)%innerLen!=0)
+                {
+                    temp = temp - xk[i+1]; //right of diag
+                }
+                if (i<vec_size-(innerLen))
+                {
+                    temp = temp - xk[i+innerLen];
+                }
+                xkp1[i] = (temp*aij + b[i])*daii;
             }
-            if (i>0 && i%innerLen!=0)
+            #pragma omp single
             {
-                temp = temp - xk[i-1]; //left of diag
+                xk.swap(xkp1);
+                //omp_get_wtime
+                clock_gettime(CLOCK_REALTIME, &tRound);
+                runtime = double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9;
+                stop = runtime > maxTime_s; 
+                if (iteration%10000 == 0) 
+                {   
+                    cout <<"Iteration <" << iteration << "> done!" << endl;
+                    cout << "Stop: " << stop << endl;
+                }
             }
-            if (i<(vec_size-1) && (i+1)%innerLen!=0)
-            {
-                temp = temp - xk[i+1]; //right of diag
-            }
-            if (i<vec_size-(innerLen))
-            {
-                temp = temp - xk[i+innerLen];
-            }
-            xkp1[i] = (temp*aij + b[i])*daii;
-        }
-        xk.swap(xkp1);
-        runtime = omp_get_wtime() - t0;
-        stop = runtime > maxTime_s;
-        if (stop)
-        {
-            iterationsDone = iteration+1;
-            break;
+            if (stop){
+                    iterationsDone = iteration+1;
+                    //stop = 1;
+                    //#pragma omp cancel parallel
+                }
+            #pragma omp cancellation point parallel
         }
     }
+    }
     if (iterationsDone == 0){iterationsDone = maxIter;}
-    maxTime_s = runtime;
     return iterationsDone;
 }   
 int checkMaxThreads(int& threads){
@@ -187,7 +215,6 @@ int checkMaxThreads(int& threads){
     return 0;
 }
 int inputIUE(int argc, char* argv[],size_t &N,int &threads){
-    // ./stenciljacobi [resolution] [threads]
     assert(argc==3);
     cout << "Command line arguments recognized. Parsing in IUE mode..." << endl;
     string str = argv[1];
@@ -196,8 +223,7 @@ int inputIUE(int argc, char* argv[],size_t &N,int &threads){
     threads = stoi(str);
     return 0;
 }
-int inputPC(int argc, char* argv[], size_t& N, size_t& maxIterations, int& threads)
-{   // ./stenciljacobi [resolution] [maxIterations] [threads]
+int inputPC(int argc, char* argv[],size_t &N,size_t &maxIterations,int &threads){
     assert(argc==4);
     cout << "Command line arguments recognized. Parsing in PC mode..." << endl;
     string str = argv[1];
@@ -210,13 +236,14 @@ int inputPC(int argc, char* argv[], size_t& N, size_t& maxIterations, int& threa
 }
 /*----------------- MAIN -------------------*/
 int main(int argc, char *argv[]){
-    size_t N, innerLen, vec_size, maxIterations = 200000;
-    int threads=0, mode, chunk; 
+    size_t N, innerLen, vec_size, maxIterations;
+    int threads=0, mode;
     const double k= 2 * M_PI, k2 = pow(k,2);
-    double h, h2, dh2, aii, aij, maxTime = 10.0;
+    double h, h2, dh2, eucNorm, maxNorm, aii, aij, itRuntime = 0.0;
+	struct timespec tItEnd, tItStart;
     //----------------Input----------------//
-    // mode = inputPC(argc,argv, N, maxIterations,threads);
-    mode = inputIUE(argc,argv,N,threads);
+    mode = inputPC(argc,argv, N, maxIterations,threads);
+    // mode = inputIUE(argc,argv, N, maxIterations,threads);
     assert(mode==0 or mode==1);
     cout << "Resolution of <"<< N << "> selected!" << endl;
     cout << "Solving with Jacobi method using <" << maxIterations << "> iterations." << endl; 
@@ -228,7 +255,6 @@ int main(int argc, char *argv[]){
         cout << omp_get_max_threads() << " would be available!" << endl;
     }
     cout << "Using <" << threads << "> threads." << endl;
-    cout << "Policy: " << "dynamic" << endl;
     // Starting time measurement here
     cout << "-------------------------------------------------------------------" << endl;
     // Let's compute some values we will need quite often
@@ -236,15 +262,18 @@ int main(int argc, char *argv[]){
     h = 1.0/double(N-1);
     h2 = pow(h,2);
     dh2 = 1.0/h2;
-    vec_size = innerLen*innerLen;
     omp_set_num_threads(threads);
-    chunk = int(double(vec_size)/threads);
+    int chunk = innerLen;
     //----------------Create FD stencil----------------//
     //Reserve memory
+    vec_size = pow(innerLen,2);
     //
     vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
+    cout << "Status:\n size(u):" << u.size() << endl;
+    cout << "size(up):" << up.size() << endl;
+    cout << "size(b):" << b.size() << endl;
     //Create --> put into function
-    #pragma omp parallel for shared(up,b) firstprivate(N,h,k,dh2) schedule(dynamic,chunk)
+    #pragma omp parallel for shared(up,b) firstprivate(N,h,k,dh2) schedule(dynamic, chunk)
     for (size_t i = 0; i < vec_size; i++)
     {
         double x = getX(i, N, h);
@@ -258,15 +287,39 @@ int main(int argc, char *argv[]){
             b[i] = f(x,y,k);
         }
     }
-
+    
     // Use Jacobi Method to solve for u
     aii = 4.0/h2 + k2;
     aij = -1.0/h2;
-    size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, chunk, maxTime);
+    clock_gettime(CLOCK_REALTIME, &tItStart);
+    size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, 10.0);
+    clock_gettime(CLOCK_REALTIME, &tItEnd);
 
+    vector<double> result(vec_size, 0.0);
+    cout << "Status:\n size(u):" << u.size() << endl;
+    cout << "size(up):" << up.size() << endl;
+    cout << "size(b):" << b.size() << endl;
+    cout << "size(result):" << result.size() << endl;
+    // Compute residual = A*u - b after Jacobi Method
+    checkEq(result, u, b, aii, aij, N);
+    size_t index_of_max=0;
+    eucNorm = normVecEuc(result, vec_size);
+    maxNorm = normVecMax(result, vec_size, index_of_max);
+    cout << "eucNorm(A*u-b): " << eucNorm << endl;
+    cout << "maxNorm(A*u-b): " << maxNorm << endl;
+
+    // Compute  total error up - u 
+    vecVecSub(result, up, u, vec_size); // result = up - u
+    eucNorm = normVecEuc(result, vec_size);
+    maxNorm = normVecMax(result, vec_size, index_of_max);
+    cout << "eucNorm(up-u): " << eucNorm << endl;
+    cout << "maxNorm(up-u): " << maxNorm << endl;
+
+    // Get runtime for this run and write into file
+    itRuntime = double(tItEnd.tv_sec - tItStart.tv_sec) + double(tItEnd.tv_nsec - tItStart.tv_nsec)/1e9;
+    cout << "runtime: " << itRuntime << "s" << endl;
     cout << "Iterations: " << iterationsDone << endl;
-    cout << "runtime: " << maxTime << "s" << endl;
-    cout << "Average runtime per iteration: " << maxTime/iterationsDone << "s" << endl;
+    cout << "Average runtime per iteration: " << itRuntime/iterationsDone << "s" << endl;
     return 0;
 }
 
