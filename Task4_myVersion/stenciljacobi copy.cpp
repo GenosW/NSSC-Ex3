@@ -142,9 +142,24 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
     int chunk = innerLen;
     bool stop = false;
     double daii = 1/aii, runtime = 0.0, t0 = omp_get_wtime();
+    // struct timespec tRound, tSt;
     vector<double> xkp1(vec_size, 0); // Vector initialized with 0
+    // clock_gettime(CLOCK_REALTIME, &tSt);
+    //# pragma omp parallel shared(aij,aii,N,h,k,dh2,up,b)
+    //#pragma omp parallel shared(b,xk,xkp1,aij,aii,vec_size,innerLen)
+    //
+    //IF OMP_CANCELLATION=true 
+    //cout << omp_get_cancellation() << endl;
+    //assert(omp_get_cancellation());
+    // #pragma omp parallel shared(b,xk,xkp1,stop,runtime)  firstprivate(innerLen,aij,aii,vec_size)
+    {
+    //for (size_t iteration = 0; iteration < maxIter and stop<0; iteration++)
     for (size_t iteration = 0; iteration < maxIter; iteration++)
     {
+        // xkp1 = (b[i] - aij*xk[j])/aii
+        // # pragma omp sections nowait
+        // if(!stop){
+        //#pragma omp cancellation point parallel
         #pragma omp parallel for schedule(dynamic,chunk) shared(b,xk,xkp1) firstprivate(innerLen,aij,aii,vec_size)
         for (size_t i = 0; i < vec_size; i++) // i is index of vector
         {
@@ -167,14 +182,28 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             }
             xkp1[i] = (temp*aij + b[i])*daii;
         }
+        // #pragma omp single
+        // {
         xk.swap(xkp1);
         runtime = omp_get_wtime() - t0;
-        stop = runtime > maxTime_s;
-        if (stop)
-        {
-            iterationsDone = iteration+1;
-            break;
-        }
+        // clock_gettime(CLOCK_REALTIME, &tRound);
+        // runtime = double(tRound.tv_sec - tSt.tv_sec) + double(tRound.tv_nsec - tSt.tv_nsec)/1e9;
+        stop = runtime > maxTime_s; 
+        // if (iteration%10000 == 0) 
+        // {   
+        //     cout <<"Iteration <" << iteration << "> done!" << endl;
+        //     cout << "Stop: " << stop << endl;
+        // }
+        // }
+        if (stop){
+                iterationsDone = iteration+1;
+                break;
+        //         //stop = 1;
+                // #pragma omp cancel parallel
+            }
+        // #pragma omp cancellation point parallel
+        // }
+    }
     }
     if (iterationsDone == 0){iterationsDone = maxIter;}
     maxTime_s = runtime;
@@ -188,17 +217,18 @@ int checkMaxThreads(int& threads){
     return 0;
 }
 int inputIUE(int argc, char* argv[],string policy,size_t &N,int &threads){
-    // ./stenciljacobi [resolution] [threads]
+    // ./stenciljacobi [policy] [resolution] [threads]
     assert(argc==3);
     cout << "Command line arguments recognized. Parsing in IUE mode..." << endl;
+    // string str = argv[1];
+    // policy = str;
     string str = argv[1];
     N = stoi(str);
     str = argv[2];
     threads = stoi(str);
     return 0;
 }
-int inputPC(int argc, char* argv[], size_t& N, size_t& maxIterations, int& threads)
-{   // ./stenciljacobi [resolution] [maxIterations] [threads]
+int inputPC(int argc, char* argv[],size_t &N,size_t &maxIterations,int &threads){
     assert(argc==4);
     cout << "Command line arguments recognized. Parsing in PC mode..." << endl;
     string str = argv[1];
@@ -243,7 +273,7 @@ int main(int argc, char *argv[]){
     int chunk = innerLen;
     //----------------Create FD stencil----------------//
     //Reserve memory
-    vec_size = innerLen*innerLen;
+    vec_size = pow(innerLen,2);
     //
     vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
     //Create --> put into function
@@ -261,14 +291,39 @@ int main(int argc, char *argv[]){
             b[i] = f(x,y,k);
         }
     }
-
+    
     // Use Jacobi Method to solve for u
     aii = 4.0/h2 + k2;
     aij = -1.0/h2;
+    // clock_gettime(CLOCK_REALTIME, &tItStart);
     size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, maxTime);
+    // clock_gettime(CLOCK_REALTIME, &tItEnd);
+    /*
+    vector<double> result(vec_size, 0.0);
+    cout << "Status:\n size(u):" << u.size() << endl;
+    cout << "size(up):" << up.size() << endl;
+    cout << "size(b):" << b.size() << endl;
+    cout << "size(result):" << result.size() << endl;
+    // Compute residual = A*u - b after Jacobi Method
+    checkEq(result, u, b, aii, aij, N);
+    size_t index_of_max=0;
+    eucNorm = normVecEuc(result, vec_size);
+    maxNorm = normVecMax(result, vec_size, index_of_max);
+    cout << "eucNorm(A*u-b): " << eucNorm << endl;
+    cout << "maxNorm(A*u-b): " << maxNorm << endl;
 
-    cout << "Iterations: " << iterationsDone << endl;
+    // Compute  total error up - u 
+    vecVecSub(result, up, u, vec_size); // result = up - u
+    eucNorm = normVecEuc(result, vec_size);
+    maxNorm = normVecMax(result, vec_size, index_of_max);
+    cout << "eucNorm(up-u): " << eucNorm << endl;
+    cout << "maxNorm(up-u): " << maxNorm << endl;
+    */
+    // Get runtime for this run and write into file
+    // itRuntime = double(tItEnd.tv_sec - tItStart.tv_sec) + double(tItEnd.tv_nsec - tItStart.tv_nsec)/1e9;
+    // cout << "runtime: " << itRuntime << "s" << endl;
     cout << "runtime: " << maxTime << "s" << endl;
+    cout << "Iterations: " << iterationsDone << endl;
     cout << "Average runtime per iteration: " << maxTime/iterationsDone << "s" << endl;
     return 0;
 }
