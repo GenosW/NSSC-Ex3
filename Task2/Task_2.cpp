@@ -128,7 +128,8 @@ void matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double>& JA, vec
 	}
 }
 int input(int argc, char* argv[], string& mode,string& filename,int& threads){
-    //assert(argc==4);
+    assert(argc==4);
+	// ./cgEigen [resolution] [filename] [threads]
     cout << "Command line arguments recognized. Parsing..." << endl;
     mode = argv[1];
 	cout << "Mode: <" << mode << "> selected." << endl;
@@ -171,30 +172,34 @@ int main(int argc, char *argv[])
 	cout << "here" << endl;
 	Eigen::loadMarket(SpA,filename);
 	cout << "here" << endl;
-	Eigen::VectorXd xStarE, bE(vec_size), xE(vec_size);
+	Eigen::VectorXd xStarE, bE(vec_size), xE(vec_size), x0;
 	xStarE.setOnes(vec_size);
+	x0.setZero(vec_size);
 
 	//cout << xStarE << endl;
 	// fill A and b
-	Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::SelfAdjoint> cg(SpA);
+	Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> cg(SpA);
 	bE = SpA * xStarE;
 	// cg.setMaxIterations(1);
-	for(int i=0; i < 1000; i++)
-	{
-		cg.setMaxIterations(i);
-		xE = cg.solve(bE);
-		if (i%100 == 0)
-		{
-			cout << "iterations this loop iteration: " << cg.iterations() << endl;
-			cout << cg.error() << endl;;
-			cout << (xE - xStarE).norm() << endl;;
-			cout << "-------" << endl;
-		}
-	}
-	
-	std::cout << "#iterations:     " << cg.iterations() << std::endl;
-	std::cout << "estimated error: " << cg.error() << std::endl;
-	std::cout << "Norm(x - x*):    " << (xE - xStarE).norm() << std::endl;
+	//for(int i=0; i < 1000; i++)
+	// {
+	// 	cg.setMaxIterations(i);
+	// 	xE = cg.solve(bE);
+	// 	if (i%100 == 0)
+	// 	{
+	// 		cout << "iterations this loop iteration: " << cg.iterations() << endl;
+	// 		cout << cg.error() << endl;;
+	// 		cout << (xE - xStarE).norm() << endl;;
+	// 		cout << "-------" << endl;
+	// 	}
+	// }
+	cg.setMaxIterations(100000);
+	xE = cg.solveWithGuess(bE,x0);
+	cout << "-------" << endl;
+	std::cout << "#iterations:			" << cg.iterations() << std::endl;
+	std::cout << "estimated error:		" << cg.error() << std::endl;
+	std::cout << "Norm(x - x*):			" << (xE - xStarE).norm() << std::endl;
+	std::cout << "NormA(x-x*):			" << (xE-xStarE).transpose()*(SpA*(xE-xStarE)) << std::endl;
 	std::cout << "maxCoeffs(x - x*):    " << (xE - xStarE).maxCoeff() << std::endl;
 	// update b, and solve again
 	//x = cg.solve(b);
