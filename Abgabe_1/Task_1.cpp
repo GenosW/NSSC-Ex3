@@ -31,7 +31,7 @@ void displayVectorBig(vector<double> x, string name)
 
 vector<vector<double>> readMatrix(string file)
 {
-	// This reads the matrix and converts it to CCS
+	// This reads the matrix and converts it to CCS in one run
 
 	ifstream in(file);
 
@@ -80,24 +80,18 @@ vector<vector<double>> readMatrix(string file)
 	}
 
 	result.push_back(IA);
-	//cout << "size(IA): " << result[0].size() << endl;
-	//displayVector(IA);
 	result.push_back(JAnew);
-	//cout << "size(JA): " << result[1].size()  << endl;
-	//displayVector(JAnew);
 	result.push_back(V);
-	//cout << "size(V): " << result[2].size()  << endl;
-	//displayVector(V);
-    cout << "Read in everything successfully" << endl << endl;
+    cout << endl << "Read in everything successfully" << endl << endl;
 	return result;
 }
 
 void matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double>& JA, vector<double>& x, vector<double>& y)
 {
 	size_t vec_size = x.size();
-	for(size_t i = 0; i<vec_size; i++) // iterate over all rows
+	for(size_t i = 0; i<vec_size; i++) 
 	{
-		for(size_t j = 0; j < i; j++) // iterate over all columns left of diag
+		for(size_t j = 0; j < i; j++) 
 		{
 			for(size_t index = JA[j]; index < JA[j+1]; index++)
 			{
@@ -167,9 +161,6 @@ double euclidicNorm(vector<double> a)
 vector<vector<double>> CG(vector<vector<double>> A, vector<double> x0, vector<double> r0, int iteration, vector<double> xorig)
 {
 	ofstream outfile;
-	// this data file will be overwritten when executed!
-	// a backup file with the data for 10000 iterations
-	// is located in the subfolder "data_10000it"!
 	outfile.open("data.txt");
 	outfile << "||rk||2 / ||r0|||2;||ek||A" << endl;
 	int vec_size = A[1].size() - 1;
@@ -178,10 +169,9 @@ vector<vector<double>> CG(vector<vector<double>> A, vector<double> x0, vector<do
 	IA = A[0];
 	JA = A[1];
 	V = A[2];
-	// start parameters
-	vector<double> r = r0;
-	vector<double> p = r0;
-	vector<double> x = x0;
+	vector<double> r = r0;		// starting paramter
+	vector<double> p = r0;		// starting paramter
+	vector<double> x = x0;		// starting paramter
 	double beta;
 	double rkrk;
 	double alpha;
@@ -193,10 +183,10 @@ vector<vector<double>> CG(vector<vector<double>> A, vector<double> x0, vector<do
 		rkrk = scalarProduct(r,r);
 		alpha = rkrk/(scalarProduct(p,Ap));			// step length
 		x = vectorSum(x,scalarVector(alpha,p));		// new approximate solution
-		r = vectorDiff(r,scalarVector(alpha,Ap));	// residual ("error")
-		beta = scalarProduct(r,r)/rkrk;				// improvement
-		p = vectorSum(r,scalarVector(beta,p));		// next search direction
-		if(i%50 == 0)
+		r = vectorDiff(r,scalarVector(alpha,Ap));	// residual
+		beta = scalarProduct(r,r)/rkrk;				// improvement this step
+		p = vectorSum(r,scalarVector(beta,p));		// search direction for next iteration
+		if(i%10 == 0)
 		{
 			cout << "Iteration " << i << " done" << endl << endl ;
 		}
@@ -204,7 +194,7 @@ vector<vector<double>> CG(vector<vector<double>> A, vector<double> x0, vector<do
 		vector<double> ek = vectorDiff(xorig, x);
 		vector<double> Aek(vec_size, 0.0);
 		matrixmulCCS(A[2],A[0], A[1], ek, Aek);
-		outfile << euclidicNorm(r)/euclidicNorm(r0) << ";" << sqrt(scalarProduct(ek,Aek)) << endl; // output (scaled) residual and A-norm of error
+		outfile << euclidicNorm(r)/euclidicNorm(r0) << ";" << sqrt(scalarProduct(ek,Aek)) << endl;
 	}
 
 	result.push_back(x);
@@ -221,7 +211,7 @@ int main(int argc, char *argv[])
 	vector<double> x(vec_size, 1.0);
 	vector<double> b(vec_size, 0.0);		// right hand side for x = [1 1 1 ... 1]
 
-	matrixmulCCS(A[2],A[0],A[1],x,b); 		// changes b to the result of b=A*x
+	matrixmulCCS(A[2],A[0],A[1],x,b);
 
 	vector<double> x0(vec_size, 0.0);
 	vector<vector<double>> res = CG(A,x0,b,stoi(argv[2]),x);

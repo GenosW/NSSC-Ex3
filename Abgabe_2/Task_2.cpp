@@ -35,6 +35,8 @@ void displayVectorBig(vector<double> x, string name)
 
 Eigen::SparseMatrix<double> readMatrixEigen(string file)
 {
+	// this reads in a spd matrix in coordinate form and gives back a full Sparse Matrix
+
 	ifstream in(file);
 
 	string a, b, c, line, entry;
@@ -61,7 +63,7 @@ Eigen::SparseMatrix<double> readMatrixEigen(string file)
 
 	tripletList.erase(tripletList.begin());
 
-	typedef Eigen::SparseMatrix<double,0,int> M;
+	typedef Eigen::SparseMatrix<double> M;
 	M Matrix(z,z);
 	Matrix.setFromTriplets(tripletList.begin(),tripletList.end());
 	Matrix = M(Matrix.selfadjointView<Eigen::Lower>());
@@ -72,7 +74,7 @@ Eigen::SparseMatrix<double> readMatrixEigen(string file)
 
 vector<vector<double>> readMatrix(string file)
 {
-	// This reads the matrix and converts it to CCS
+	// This reads the matrix and converts it to CCS in one run
 
 	ifstream in(file);
 
@@ -122,15 +124,9 @@ vector<vector<double>> readMatrix(string file)
 	}
 
 	result.push_back(IA);
-	//cout << "size(IA): " << result[0].size() << endl;
-	//displayVector(IA);
 	result.push_back(JAnew);
-	//cout << "size(JA): " << result[1].size()  << endl;
-	//displayVector(JAnew);
 	result.push_back(V);
-	//cout << "size(V): " << result[2].size()  << endl;
-	//displayVector(V);
-    cout << "Read in everything successfully" << endl << endl;
+    cout << endl << "Read in everything successfully for our own implementation" << endl << endl;
 	return result;
 }
 
@@ -138,9 +134,9 @@ vector<vector<double>> readMatrix(string file)
 void matrixmulCCS(vector<double>& V, vector<double>& IA, vector<double>& JA, vector<double>& x, vector<double>& y)
 {
 	size_t vec_size = x.size();
-	for(size_t i = 0; i<vec_size; i++) // iterate over all rows
+	for(size_t i = 0; i<vec_size; i++) 
 	{
-		for(size_t j = 0; j < i; j++) // iterate over all columns left of diag
+		for(size_t j = 0; j < i; j++) 
 		{
 			for(size_t index = JA[j]; index < JA[j+1]; index++)
 			{
@@ -298,7 +294,6 @@ int main(int argc, char *argv[])
         if(i%100 == 0)
         {
             cout << "Diagonally preconditioned Eigen iteration " << i << endl;
-            cout << cg.error() << endl;
         }
         outfileEigen << cg.error() << endl;
     }
@@ -312,18 +307,17 @@ int main(int argc, char *argv[])
         xE = cgCholesky.solve(bE);
         if(i%100 == 0)
         {
-            cout << "Cholesky preconditioned Eigen iteration " << i << endl;
-            cout << cgCholesky.error() << endl;
+            cout << "Incomplete Cholesky preconditioned Eigen iteration " << i << endl;
         }
         outfileEigenCholesky << cgCholesky.error() << endl;
     }
     outfileEigenCholesky.close();
 
 	cout << endl << endl << endl;
-	cout << "------------ Summary ------------" << endl << endl;
+	cout << "------------ Summary after " << argv[2] << " iterations ------------" << endl << endl;
 	cout << "||rk||2 / ||r0|||2 for our own implementation = " << euclidicNorm(res[1])/euclidicNorm(b) << endl << endl;
 	cout << "Error of diagonally preconditioned Eigen method =" << cg.error() << endl << endl;
-	cout << "Error of Cholesky preconditioned Eigen method =" << cgCholesky.error() << endl << endl;;
+	cout << "Error of Incomplete Cholesky preconditioned Eigen method =" << cgCholesky.error() << endl << endl;;
     
 
     return 0;

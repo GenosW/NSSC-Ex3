@@ -12,44 +12,6 @@
 
 using namespace std;
 
-void displayVector(const vector<double>& v, size_t N){
-    uint limit = 16;
-    if (limit > N){limit = N;}
-    for (size_t i = 0; i < limit; i++)
-    {
-        cout << "\n" << setw(4) << v[i];
-    }
-    cout << endl;
-}
-
-void displayMatrix(vector<double>& A, size_t N){
-    uint limit = 10;
-    if (limit > N){limit = N;}
-    cout << "mat:" << setw(4) << "\n";
-    for (size_t i = 0; i < limit; i++)
-    {
-        for (size_t j = 0; j < limit; j++)
-        {
-            cout << A[i*N + j] << "\t";
-        }
-        cout << endl;
-    }
-}
-
-void displayGrid(vector<double>& v, size_t N){
-    uint limit = 10;
-    if (limit > N){limit = N;}
-    cout << setw(8) << setprecision(4) << "\n" ;
-    for (size_t i = 0; i < limit; i++)
-    {
-        for (size_t j = 0; j < limit; j++)
-        {
-            cout  << v[i*N + j] << "\t\t";
-        }
-        cout << "\n";
-    }
-}
-
 double up_func(double x, double y, double k){
     return sin(k*x)*sinh(k*y);
 }
@@ -64,76 +26,6 @@ double getX(size_t i, size_t N, double h){
 
 double getY(size_t i, size_t N, double h){
     return (floor(i/(N-2))+1)*h;
-}
-
-int vecVecSub(vector<double>& c,vector<double>& a, vector<double>& b, size_t vec_size){
-    assert(vec_size == c.size() && vec_size == a.size() && vec_size == b.size());
-    for (size_t i = 0; i < vec_size; i++)
-    {
-        c[i]=(a[i] - b[i]);
-    }
-    return 0;
-}
-
-double normVecMax(const vector<double>& v, size_t vec_size, size_t& index){
-    assert(vec_size == v.size());
-    double temp = 0;
-    index = -1;
-    for (size_t i = 0; i < vec_size; i++)
-    {
-        if (abs(v[i])>temp)
-        {
-            temp = abs(v[i]);
-            index = i;
-        }
-    }
-    return temp;
-}
-
-double normVecEuc(const vector<double>& v, size_t vec_size){
-    assert(vec_size == v.size());
-    double temp = 0;
-    for (size_t i = 0; i < vec_size; i++)
-    {
-        temp += pow(v[i],2);
-    }
-    // return sqrt(temp/v_size); //"normalized variant"
-    return sqrt(temp);
-}
-int initVec(vector<double>& u, size_t vec_size){
-    assert(vec_size == u.size());
-    for (size_t i = 0; i < vec_size; i++)
-    {
-        u[i] = 0;
-    }
-    return 0;
-}
-
-int checkEq(vector<double>& result, vector<double>& u, vector<double>& b, double aii, double aij, int N){
-    const size_t vec_size=u.size(), innerLen = N-2;
-    if (vec_size!=pow(innerLen,2)){
-        cerr << "vec_size != pow(N,2)" << endl;
-        return -1;
-    }
-    #pragma omp parallel for shared(b,u) firstprivate(aij,aii,vec_size,innerLen) schedule(dynamic)
-    for (size_t i = 0; i < vec_size; i++)
-    {
-        double tempDiff = aii*u[i] - b[i];
-        if (i>(innerLen-1)){
-            tempDiff += aij*u[i-innerLen];
-        }
-        if ((i>0) && (i%innerLen!=0)){
-            tempDiff += aij*u[i-1];
-        }
-        if (i<(vec_size-1) && (i+1)%innerLen!=0){
-            tempDiff += aij*u[i+1];
-        }
-        if (i<vec_size-innerLen){
-            tempDiff += aij*u[i+innerLen];
-        }
-        result[i]= tempDiff; 
-    }
-    return 0;
 }
 
 int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, const double aij, const int N, const double maxIter, const int chunk, double& maxTime_s){
@@ -241,7 +133,6 @@ int main(int argc, char *argv[]){
     chunk = int(double(vec_size)/threads);
     //----------------Create FD stencil----------------//
     //Reserve memory
-    //
     vector<double> u(vec_size, 0.0), up(vec_size), b(vec_size);
     //Create --> put into function
     #pragma omp parallel for shared(up,b) firstprivate(N,h,k,dh2) schedule(dynamic,chunk)
@@ -264,12 +155,8 @@ int main(int argc, char *argv[]){
     aij = -1.0/h2;
     size_t iterationsDone = jacobiMethod(u, b, aii, aij, N, maxIterations, chunk, maxTime);
 
-    cout << "Iterations: " << iterationsDone << endl;
-    cout << "runtime: " << maxTime << "s" << endl;
-    cout << "Average runtime per iteration: " << maxTime/iterationsDone << "s" << endl;
+    cout << "Total # of terations:          " << iterationsDone << endl;
+    cout << "Total runtime:                 " << maxTime << "s" << endl;
+    cout << "Average runtime per iteration: " << maxTime/iterationsDone << "s/it" << endl;
     return 0;
 }
-
-/*
-resolution={16, 32, 64, 128, 256}
-*/

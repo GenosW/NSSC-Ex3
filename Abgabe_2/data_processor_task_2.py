@@ -3,17 +3,14 @@ import matplotlib.pyplot as plt
 import csv
 import os
 
-
 ## Code starts here ##
 
 errorOwn = np.array([])
 errorDiagonal = np.array([])
 errorCholesky = np.array([])
 scriptdir = os.path.dirname(__file__)
-data_file1 = os.path.join(scriptdir,'data.txt')
-data_file2 = os.path.join(scriptdir,'dataEigen.txt')
-data_file3 = os.path.join(scriptdir,'dataEigenCholesky.txt')
-with open(data_file1) as csv_file:
+data_file = os.path.join(scriptdir,'data.txt')
+with open(data_file) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter =';')
     line_count = 0
     for row in csv_reader:
@@ -21,8 +18,9 @@ with open(data_file1) as csv_file:
             errorOwn = np.append(errorOwn,float(row[0]))
         line_count += 1
         
-        
-with open(data_file2) as csv_file:
+scriptdir = os.path.dirname(__file__)
+data_file = os.path.join(scriptdir,'dataEigen.txt')
+with open(data_file) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter =';')
     line_count = 0
     for row in csv_reader:
@@ -30,8 +28,9 @@ with open(data_file2) as csv_file:
             errorDiagonal = np.append(errorDiagonal,float(row[0]))
         line_count += 1
         
-        
-with open(data_file3) as csv_file:
+scriptdir = os.path.dirname(__file__)
+data_file = os.path.join(scriptdir,'dataEigenCholesky.txt')
+with open(data_file) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter =';')
     line_count = 0
     for row in csv_reader:
