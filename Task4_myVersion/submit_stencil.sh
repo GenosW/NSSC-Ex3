@@ -10,6 +10,4 @@ module purge > /dev/null 2>&1
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # You can start several programs with one script file/submission
 ./stenciljacobi 256 200000 4
-#./stenciljacobi 512 100000 4
-#./stenciljacobi 1024 100000 4
 

@@ -66,6 +66,7 @@ int jacobiMethod(vector<double>& xk, const vector<double>& b, const double aii, 
             }
             xkp1[i] = (temp*aij + b[i])*daii;
         }
+        omp master 
         xk.swap(xkp1);
         runtime = omp_get_wtime() - t0;
         stop = runtime > maxTime_s;

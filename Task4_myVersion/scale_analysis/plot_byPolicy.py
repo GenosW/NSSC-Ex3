@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     dir = os.path.dirname(__file__)
-    filename = os.path.join(dir,"slurm-794.csv")
+    filename = os.path.join(dir,"slurm-797.csv")
+    policy = "static,1"
     i = -1
     runtime = []
     iterations = []
@@ -31,28 +32,40 @@ if __name__ == "__main__":
                     tempth = []
 
     itPerc = []
-    for i in iterations:
+    should = []
+    for i,thr in zip(iterations[:1],threads):
         temp = []
+        temp2 = []
         for ele in i:
-            temp.append(float(ele)/float(i[-1]))
+            temp.append(float(i[-1])/float(ele))
+        for ind in range(len(i)):
+            if ind == 0:
+                temp2.append(temp[0])
+            else:
+                print(ind," : ",(thr[ind]/thr[ind-1]))
+                val = temp[ind-1]/(thr[ind]/thr[ind-1])
+                print(val)
+                temp2.append(val)
         itPerc.append(temp)
+        should.append(temp2)
 
     labels = ["256","512","1024","2048"]
-    for x,y,lab in zip(threads,itPerc,labels):
+    for x,y,z,lab in zip(threads,itPerc,should,labels):
         plt.plot(x,y,marker="o",label=lab)
-    plt.suptitle("Iterations done (scaled)\nschedule=dynamic")
+        plt.plot(x,z,marker="x",label=lab)
+    plt.suptitle("Iterations done (scaled)\nschedule="+policy)
     plt.grid()
     plt.legend()
-    plt.savefig(os.path.join(dir,"dynamic_percent"))
+    plt.savefig(os.path.join(dir,policy+"_percent"))
 
     for x,y,lab in zip(threads,iterations,labels):
         plt.plot(x,y,marker="o",label=lab)
-    plt.suptitle("Iterations done\nschedule=dynamic")
-    plt.savefig(os.path.join(dir,"dynamic_iterations"))
+    plt.suptitle("Iterations done\nschedule="+policy)
+    plt.savefig(os.path.join(dir,policy+"_iterations"))
 
     for x,y,lab in zip(threads,runtime,labels):
         plt.plot(x,y,marker="o",label=lab)
-    plt.suptitle("Average runtime per iteration\nschedule=dynamic")
-    plt.savefig(os.path.join(dir,"dynamic_runtime"))
+    plt.suptitle("Average runtime per iteration\nschedule="+policy)
+    plt.savefig(os.path.join(dir,policy+"_runtime"))
                     
                 
