@@ -14,7 +14,7 @@ CXXFLAGS= -v -std=c++14 -O3 -Wall -pedantic -march=native -ffast-math -fopenmp
 all: stenciljacobi
  
 stenciljacobi: stenciljacobi.cpp Makefile
-	$(CXX) stenciljacobi.cpp -o stenciljacobi $(CXXFLAGS)
+	$(CXX) stenciljacobi.cpp -o stencilomp $(CXXFLAGS)
 
 .PHONY: clean
 clean:

@@ -1,9 +1,7 @@
 #define _USE_MATH_DEFINES
-// #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-// #include <regex>
 #include <vector>
 #include <cmath>
 #include <ctime>
@@ -151,7 +149,3 @@ int main(int argc, char *argv[]){
     }
     return 0;
 }
-
-/*
-resolution={16, 32, 64, 128, 256}
-*/
